@@ -47,16 +47,15 @@ class Teacher extends Model implements TeacherInterface {
   }
 
   public static async register(input: object, options?: UpsertGraphOptions) {
-    console.log('** Input in Model **', input)
     try {
       const result: any = await transaction(Teacher, async Teacher => {
         return await Teacher.query()
           .upsertGraphAndFetch(input, options)
-          .withGraphFetched('[students]');
+          .withGraphFetched("[students]");
       });
       return result;
     } catch (error) {
-      console.log('** Error from Model **', error);
+      console.log(error);
     }
   }
 }

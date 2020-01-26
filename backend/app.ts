@@ -18,8 +18,7 @@ mysqlConnnection.connect(err => {
   if (!err) {
     console.log("Connected to MySql DB");
   } else {
-    console.log(err);
-    console.log("Error connecting to MySql DB");
+    console.log("Error connecting to MySql DB", err);
   }
 });
 
