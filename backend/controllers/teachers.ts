@@ -1,4 +1,6 @@
+import { flatten } from 'lodash';
 import Teacher from "../models/Teacher";
+import { isArray } from "util";
 
 interface RegistrationVariables {
   teacher: { id: number; email: string } | string;
@@ -19,8 +21,8 @@ export const getAll = async (req: any, res: any) => {
 export const register = async (req: RegistrationRequestVariable, res: any) => {
   const { teacher, students } = req.body;
 
-  const email = typeof teacher === "object" ? teacher.email : teacher;
-  const id = typeof teacher === "object" ? teacher.id : undefined;
+  const email = typeof teacher === 'object' ? teacher.email : teacher;
+  const id = typeof teacher === 'object' ? teacher.id : undefined;
 
   const isTeacherExists = await Teacher.query().where("email", email);
 
@@ -30,11 +32,9 @@ export const register = async (req: RegistrationRequestVariable, res: any) => {
     const input: object = {
       id,
       email,
-      students: (students as Array<
-        { id: number; email: string } | string
-      >).map(student =>
-        typeof student === "object"
-          ? { id: student.id && student.id, email: student.email }
+      students: (students as Array<{ id: number; email: string } | string>).map(
+        student => typeof student === "object" ?
+          { id: student.id && student.id, email: student.email }
           : student
       )
     };
@@ -43,11 +43,48 @@ export const register = async (req: RegistrationRequestVariable, res: any) => {
       relate: ["students"],
       unrelate: ["students"]
     };
+
     try {
       const result = await Teacher.register(input, options);
-      res.send(result);
+
+      res.status(200).json({ teacher: result });
     } catch (error) {
-      console.log(error);
+      res
+        .status(500)
+        .json({ message: "An error occurred while creating registering" });
     }
   }
+};
+
+export const getCommonStudents = async (req: any, res: any) => {
+  const { teacher } = req.query;
+
+  if (!isArray(teacher)) {
+    try {
+      const givenTeacher = Teacher.query().where('email', teacher);
+      const commonstudents = await Teacher.relatedQuery('students').for(givenTeacher);
+  
+      res.status(200).json({ students: commonstudents });
+    } catch (error) {
+      res.status(500).json({ message: 'An error occured while retrieving data' });
+    }
+  } else {
+    try {
+      const givenTeachersPromises = teacher.map(async ( t: string ) => {
+        return await Teacher.query().where('email', t);
+      });
+  
+      const resolvedGivenTeachers = await Promise.all(givenTeachersPromises);
+      const givenTeachers = flatten(resolvedGivenTeachers);
+  
+      const teachersIds = givenTeachers.map(( teacher: Teacher ) => teacher.id );
+  
+      const commonStudents = await Teacher.relatedQuery('students').for(teachersIds)
+  
+      res.status(200).json({ students: commonStudents });
+    } catch (error) {
+      res.status(500).json({ message: 'An error occured while retrieving data' });
+    }
+  }
+
 };
