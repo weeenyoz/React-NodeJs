@@ -58,7 +58,7 @@ export const register = async (req: RegistrationRequestVariables, res: any) => {
     try {
       const result = await Teacher.register(input, options);
 
-      res.status(200).json({ teacher: result });
+      res.status(204).json({ teacher: result });
     } catch (error) {
       res
         .status(500)
