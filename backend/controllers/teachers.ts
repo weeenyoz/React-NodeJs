@@ -7,18 +7,29 @@ interface RegistrationVariables {
   students: Array<{ id: number; email: string }> | string[];
 }
 
-interface CreateRquestVariable<TRegistrationVariables> {
-  body: TRegistrationVariables;
+interface CreateBodyVariable<TBodyVariables> {
+  body: TBodyVariables;
 }
 
-type RegistrationRequestVariable = CreateRquestVariable<RegistrationVariables>;
+type RegistrationRequestVariables = CreateBodyVariable<RegistrationVariables>;
+
+interface CreateQueryVariables<TQueryVariables> {
+  query: TQueryVariables
+}
+interface StudentListVariables {
+  teacher: string | string[]
+}
+
+type StudentListQueryVariables = CreateQueryVariables<StudentListVariables>
+
+
 
 export const getAll = async (req: any, res: any) => {
   const teachers = await Teacher.query();
   teachers && res.send(teachers);
 };
 
-export const register = async (req: RegistrationRequestVariable, res: any) => {
+export const register = async (req: RegistrationRequestVariables, res: any) => {
   const { teacher, students } = req.body;
 
   const email = typeof teacher === 'object' ? teacher.email : teacher;
@@ -56,7 +67,7 @@ export const register = async (req: RegistrationRequestVariable, res: any) => {
   }
 };
 
-export const getCommonStudents = async (req: any, res: any) => {
+export const getCommonStudents = async (req: StudentListQueryVariables, res: any) => {
   const { teacher } = req.query;
 
   if (!isArray(teacher)) {
