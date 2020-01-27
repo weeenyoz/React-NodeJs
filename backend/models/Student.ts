@@ -1,5 +1,6 @@
 import { Model } from "objection";
 import Teacher, { TeacherInterface } from "./Teacher";
+import SuspendedStudent from './SuspendedStudents';
 
 const knex = require("../db/knex");
 Model.knex(knex);
@@ -40,6 +41,14 @@ class Student extends Model implements StudentInterface {
             to: `${Teacher.teachersStudentsJoinTableName}.teacher_id`
           },
           to: `${Teacher.tableName}.id`
+        }
+      },
+      suspendedStudents: {
+        relation: Model.HasOneRelation,
+        modelClass: SuspendedStudent,
+        join: {
+          from: `${Student.tableName}.id`,
+          to: `${SuspendedStudent.tableName}.student_id`
         }
       }
     };
