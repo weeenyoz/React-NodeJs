@@ -1,7 +1,8 @@
 import { flatten } from 'lodash';
-import Teacher from "../models/Teacher";
+import Teacher, { TeacherInterface } from "../models/Teacher";
 import Student, { StudentInterface } from '../models/Student';
 import SuspendedStudent from '../models/SuspendedStudents';
+import Notification, { NotificationInterface } from '../models/Notifications';
 import { isArray } from "util";
 
 interface RegistrationVariables {
@@ -10,26 +11,33 @@ interface RegistrationVariables {
 }
 
 interface SuspendVariables {
-  student: StudentInterface['email']
+  student: StudentInterface['email'];
 }
 
 interface CreateBodyVariables<TBodyVariables> {
   body: TBodyVariables;
 }
 
+interface CreateQueryVariables<TQueryVariables> {
+  query: TQueryVariables;
+}
+
 type RegistrationRequestVariables = CreateBodyVariables<RegistrationVariables>;
 
 type SuspendRequestVariables = CreateBodyVariables<SuspendVariables>
 
-interface CreateQueryVariables<TQueryVariables> {
-  query: TQueryVariables
-}
-
 interface StudentListVariables {
-  teacher: string | string[]
+  teacher: string | string[];
 }
 
 type StudentListQueryVariables = CreateQueryVariables<StudentListVariables>
+
+interface CreateNotificationVariables {
+  teacher: TeacherInterface['email'];
+  notification: NotificationInterface['message'];
+}
+
+type CreateNotificationReqVariables = CreateBodyVariables<CreateNotificationVariables>
 
 export const getAll = async (req: any, res: any) => {
   const teachers = await Teacher.query();
@@ -139,6 +147,35 @@ export const suspendStudent = async (req: SuspendRequestVariables, res: any) => 
       res
         .status(500)
         .json({ message: "An error occurred while suspending student." });
+    }
+  }
+
+}
+
+export const createNotification = async (req: CreateNotificationReqVariables, res: any) => {
+  const { teacher, notification } = req.body;
+
+  const isTeacherExists = await Teacher.query().where('email', teacher);
+
+  if (isTeacherExists.length === 0) {
+    res.status(400).json({ message: `Unable to create notification, teacher ${teacher} not found` });
+  } else {
+    const input: object = {
+      teacher_id: isTeacherExists[0].id,
+      message: notification
+    };
+
+    const options = {
+      relate: ["teachers"],
+      unrelate: ["teachers"]
+    };
+    try {
+      const result = await Notification.createNotification(input, options);
+      result && res.status(204).send();
+    } catch (error) {
+      res
+        .status(500)
+        .json({ message: 'An error occured while creating notification' });
     }
   }
 

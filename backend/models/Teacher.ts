@@ -1,5 +1,6 @@
 import { Model, UpsertGraphOptions, transaction } from "objection";
 import Student, { StudentInterface } from "./Student";
+import Notification, { NotificationInterface } from './Notifications';
 
 const knex = require("../db/knex");
 Model.knex(knex);
@@ -8,6 +9,7 @@ export interface TeacherInterface {
   id: number;
   email: string;
   students?: StudentInterface[];
+  notifications?: NotificationInterface[];
 }
 
 class Teacher extends Model implements TeacherInterface {
@@ -17,6 +19,7 @@ class Teacher extends Model implements TeacherInterface {
   public id: number;
   public email: string;
   public students?: Student[];
+  public notifications?: Notification[];
 
   static get jsonSchema() {
     return {
@@ -41,6 +44,14 @@ class Teacher extends Model implements TeacherInterface {
             to: `${Teacher.teachersStudentsJoinTableName}.student_id`
           },
           to: `${Student.tableName}.id`
+        }
+      },
+      notifications: {
+        relation: Model.HasManyRelation,
+        modelClass: Notification,
+        join: {
+          from: `${Teacher.tableName}.id`,
+          to: `${Notification.tableName}.teacher_id`,
         }
       }
     };
