@@ -172,23 +172,29 @@ export const createNotification = async (req: CreateNotificationReqVariables, re
   if (isTeacherExists.length === 0) {
     res.status(400).json({ message: `Unable to create notification, teacher ${teacher} not found` });
   } else {
-    let studentsEmails: any = notification.split(' ');
-    studentsEmails = studentsEmails
+    let studentsMentions: any = notification.split(' ');
+    studentsMentions = studentsMentions
                         .filter(( word: string ) => word.includes('@'))
                         .map(( email: string ) => ( email.slice(1) ));
-                        
-    let studentsInMessage = studentsEmails.map( async ( email: string ) => await Student.query().where('email', email));
-    studentsInMessage = await Promise.all(studentsInMessage);
-    studentsInMessage = flatten(studentsInMessage);
+    
+    const { students: registeredStudents }: any = await isTeacherExists[0].$query().withGraphFetched('students');
 
-    const studentsNotSuspended = studentsInMessage
-                                    .filter(( student: StudentInterface ) => !student.is_suspended)
-                                    .map(( student: StudentInterface ) => ({ id: student.id, email: student.email }));
+    let fetchedMentionedStudents = studentsMentions.map( async ( email: string ) => await Student.query().where('email', email));
+    fetchedMentionedStudents = await Promise.all(fetchedMentionedStudents);
+    fetchedMentionedStudents = flatten(fetchedMentionedStudents);
+    
+    const studentsToCheck = [ ...fetchedMentionedStudents, ...registeredStudents ];
+
+    const studentsToNotify = studentsToCheck
+      .filter(( student: StudentInterface ) => !student.is_suspended)
+      .map(( student: StudentInterface ) => ({ id: student.id, email: student.email }));
+
+    console.log('studentsToNotify', studentsToNotify);
 
     const input: NotificationInput = {
       teacher_id: isTeacherExists[0].id,
       message: notification,
-      students: studentsNotSuspended
+      students: studentsToNotify
     };
 
     const options = {
@@ -205,5 +211,4 @@ export const createNotification = async (req: CreateNotificationReqVariables, re
         .json({ message: 'An error occured while creating notification' });
     }
   }
-
 }
