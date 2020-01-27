@@ -1,6 +1,6 @@
 import { Model, UpsertGraphOptions, transaction } from "objection";
 import Teacher, { TeacherInterface } from "./Teacher";
-import SuspendedStudent from './SuspendedStudents';
+import Student, { StudentInterface } from './Student';
 
 const knex = require("../db/knex");
 Model.knex(knex);
@@ -9,14 +9,17 @@ export interface NotificationInterface {
   id: number;
   teacherId: number;
   message: string;
+  students?: StudentInterface[];
 }
 
 class Notification extends Model implements NotificationInterface {
   public static tableName = "notifications";
+  public static notificationsStudentsJoinTableName = "notifications_students";
 
   public id: number;
   public teacherId: number;
   public message: string;
+  public students?: Student[];
 
   static get jsonSchema() {
     return {
@@ -39,7 +42,19 @@ class Notification extends Model implements NotificationInterface {
           from: `${Notification.tableName}.teacher_id`,
           to: `${Teacher.tableName}.id`
         }
-      }
+      },
+      students: {
+         relation: Model.ManyToManyRelation,
+         modelClass: Student,
+         join: {
+           from: `${Notification.tableName}.id`,
+           through: {
+             from: `${Notification.notificationsStudentsJoinTableName}.notification_id`,
+             to: `${Notification.notificationsStudentsJoinTableName}.student_id`
+           },
+           to: `${Student.tableName}.id`
+         }
+      },
     };
   }
 
@@ -52,24 +67,9 @@ class Notification extends Model implements NotificationInterface {
          });
          return result;
       } catch (error) {
-         console.log(error)
+         console.log(error);
       }
    }
-
-   public static async retrievefornotifications(input: object, options?: UpsertGraphOptions) {
-      console.log('input in teacher model: ', input);
-      try {
-         const result: any = await transaction(Notification, async Notification => {
-            return await Notification.query()
-               .upsertGraphAndFetch(input, options)
-               .withGraphFetched("[teachers]")
-      });
-         console.log('result in retrievefornotifications: ', result);
-      } catch (error) {
-         console.log('Error in retrievefornotifications:', error);
-      }
-   }
-
 }
 
 export default Notification;

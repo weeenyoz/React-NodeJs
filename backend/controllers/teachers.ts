@@ -39,6 +39,14 @@ interface CreateNotificationVariables {
 
 type CreateNotificationReqVariables = CreateBodyVariables<CreateNotificationVariables>
 
+type NotificationRetrieveReqVariables = CreateNotificationReqVariables
+
+interface NotificationInput {
+  teacher_id: NotificationInterface['teacherId'],
+  message: NotificationInterface['message'],
+  students: Array<{ email: string }> | string[];
+}
+
 export const getAll = async (req: any, res: any) => {
   const teachers = await Teacher.query();
   teachers && res.send(teachers);
@@ -123,10 +131,14 @@ export const suspendStudent = async (req: SuspendRequestVariables, res: any) => 
     res.status(404).json({ message: 'No student found' });
   } 
   else {
-    const { id } = studentToSuspend[0];
+    const { id, email } = studentToSuspend[0];
 
     const input: object = {
-      student_id: id
+      student_id: id,
+      students: {
+        email,
+        is_suspended: true 
+      }
     };
 
     const options = {
@@ -160,15 +172,30 @@ export const createNotification = async (req: CreateNotificationReqVariables, re
   if (isTeacherExists.length === 0) {
     res.status(400).json({ message: `Unable to create notification, teacher ${teacher} not found` });
   } else {
-    const input: object = {
+    let studentsEmails: any = notification.split(' ');
+    studentsEmails = studentsEmails
+                        .filter(( word: string ) => word.includes('@'))
+                        .map(( email: string ) => ( email.slice(1) ));
+                        
+    let studentsInMessage = studentsEmails.map( async ( email: string ) => await Student.query().where('email', email));
+    studentsInMessage = await Promise.all(studentsInMessage);
+    studentsInMessage = flatten(studentsInMessage);
+
+    const studentsNotSuspended = studentsInMessage
+                                    .filter(( student: StudentInterface ) => !student.is_suspended)
+                                    .map(( student: StudentInterface ) => ({ id: student.id, email: student.email }));
+
+    const input: NotificationInput = {
       teacher_id: isTeacherExists[0].id,
-      message: notification
+      message: notification,
+      students: studentsNotSuspended
     };
 
     const options = {
-      relate: ["teachers"],
-      unrelate: ["teachers"]
+      relate: ["teachers", "students"],
+      unrelate: ["teachers", "students"]
     };
+
     try {
       const result = await Notification.createNotification(input, options);
       result && res.status(204).send();

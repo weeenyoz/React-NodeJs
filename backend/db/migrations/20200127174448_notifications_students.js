@@ -1,13 +1,6 @@
 exports.up = function(knex) {
-  return knex.schema.createTable("teachers_students", table => {
+  return knex.schema.createTable("notifications_students", table => {
     table.increments(),
-    table
-      .integer("teacher_id")
-      .unsigned()
-      .references("id")
-      .inTable("teachers")
-      .onDelete("CASCADE")
-      .notNull();
     table
       .integer("student_id")
       .unsigned()
@@ -15,10 +8,15 @@ exports.up = function(knex) {
       .inTable("students")
       .onDelete("CASCADE")
       .notNull();
+    table
+      .integer("notification_id")
+      .unsigned()
+      .references("id")
+      .inTable("notifications")
+      .onDelete("CASCADE")
+      .notNull();
     table.timestamps(true, true);
   });
 };
 
-exports.down = function(knex) {
-  return knex.schema.dropTable("teachers_students");
-};
+exports.down = function(knex) {};

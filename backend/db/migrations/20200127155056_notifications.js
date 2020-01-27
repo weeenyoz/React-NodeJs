@@ -1,13 +1,13 @@
 exports.up = function(knex) {
    return knex.schema.createTable('notifications', table => {
      table.increments(),
-       table
-         .integer('teacher_id')
-         .unsigned()
-         .references('id')
-         .inTable('teachers')
-         .onDelete('CASCADE')
-         .notNull();
+      table
+        .integer('teacher_id')
+        .unsigned()
+        .references('id')
+        .inTable('teachers')
+        .onDelete('CASCADE')
+        .notNull();
       table
          .text('message')
          .notNull()
