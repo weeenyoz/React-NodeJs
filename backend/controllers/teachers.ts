@@ -128,7 +128,7 @@ export const getCommonStudents = async (req: StudentListQueryVariables, res: any
 export const suspendStudent = async (req: SuspendRequestVariables, res: any) => {
   const { student } = req.body;
 
-  const studentToSuspend = await Student.query().select().where('email', student);
+  const studentToSuspend = await Student.query().select().where('email', student).column('id', 'email')
 
   if ( studentToSuspend.length === 0 ) {
     res.status(404).json({ message: 'No student found' });
@@ -139,6 +139,7 @@ export const suspendStudent = async (req: SuspendRequestVariables, res: any) => 
     const input: object = {
       student_id: id,
       students: {
+        id,
         email,
         is_suspended: true 
       }

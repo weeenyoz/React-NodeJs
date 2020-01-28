@@ -43,7 +43,7 @@ class SuspendedStudent extends Model implements SuspendedStudentInterface {
     try {
       const result: any = await transaction(SuspendedStudent, async SuspendedStudent => {
         return await SuspendedStudent.query()
-          .upsertGraphAndFetch(input, options)
+          .insertGraphAndFetch(input, options)
           .withGraphFetched("[students]");
       });
       return result;
