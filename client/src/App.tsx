@@ -16,7 +16,7 @@ const App: React.FC = () => {
       <Router>
         {/* <Nav /> */}
         <Route path="/teacher" render={(props) => <Teacher {...props} email={"teacherOne@mail.com"} />} />
-        <Route path="/student" render={(props) => <Student {...props} email={"teacherOne@mail.com"} />} />
+        <Route path="/student" render={(props) => <Student {...props} email={"studentOne@mail.com"} />} />
       </Router>
     </React.Fragment>
   );
