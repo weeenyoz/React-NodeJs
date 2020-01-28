@@ -172,30 +172,38 @@ export const suspendStudent = async (req: SuspendRequestVariables, res: any) => 
 export const retrieveNotifications = async (req: CreateNotificationReqVariables, res: any) => {
   const { teacher, notification } = req.body;
 
-  const isTeacherExists = await Teacher.query().where('email', teacher);
+  const teacherData = await Teacher.query().column('id', 'email').where('email', teacher);
 
-  if (isTeacherExists.length === 0) {
+  if (teacherData.length === 0) {
     res.status(400).json({ message: `Unable to create notification, teacher ${teacher} not found` });
   } else {
-    const { students: registeredStudents }: any = await isTeacherExists[0].$query().withGraphFetched('students');
+    const { students: registeredStudents }: any = await teacherData[0]
+                                                            .$query()
+                                                            .withGraphFetched('students') 
 
     let studentsMentions: any = notification.split(' ');
     studentsMentions = studentsMentions
                         .filter(( word: string ) => word.includes('@'))
                         .map(( email: string ) => ( email.slice(1) ));
     
-    let fetchedMentionedStudents = studentsMentions.map( async ( email: string ) => await Student.query().where('email', email));
+    let fetchedMentionedStudents = studentsMentions.map( async ( email: string ) => {
+       return await Student
+                     .query()
+                     .column('id', 'email')
+                     .where('email', email)
+    });
+
     fetchedMentionedStudents = await Promise.all(fetchedMentionedStudents);
     fetchedMentionedStudents = flatten(fetchedMentionedStudents);
     
     const studentsToCheck = [ ...fetchedMentionedStudents, ...registeredStudents ];
-
+    
     const studentsToNotify = studentsToCheck
-      .filter(( student: StudentInterface ) => !student.is_suspended)
-      .map(( student: StudentInterface ) => ({ id: student.id, email: student.email }));
-
+    .filter(( student: StudentInterface ) => !student.is_suspended)
+    .map(( student: StudentInterface ) => ({ id: student.id, email: student.email }));
+    
     const input: NotificationInput = {
-      teacher_id: isTeacherExists[0].id,
+      teacher_id: teacherData[0].id,
       message: notification,
       students: studentsToNotify
     };
@@ -209,7 +217,8 @@ export const retrieveNotifications = async (req: CreateNotificationReqVariables,
       const { id: notificationId }: Notification = await Notification.createNotification(input, options);
       if (notificationId) {
         const notification: Notification = await Notification.retrievefornotifications(notificationId);
-        notification && res.status(200).json({ recipients: notification.students });
+        const recipients = studentsToNotify.map(( student: any ) => student.email)
+        notification && res.status(200).json({ recipients });
       }
     } catch (error) {
       res
