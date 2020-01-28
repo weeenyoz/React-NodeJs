@@ -1,0 +1,33 @@
+$text-primary: #1c76d2;
+$secondary-primary: #1c76d217;
+
+nav.navbar {
+   box-shadow: 0px -1px 5px -1px rgba(0, 0, 0, 0.75);
+   margin-bottom: 20px;
+   padding: 10px 80px;
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   
+   a {
+      text-decoration: none;
+      color: $text-primary; 
+   }
+
+   .nav-links {
+      display: flex;
+      justify-content: space-between;
+      padding: 0;
+      list-style: none;
+      width: 15%;
+
+      a {
+         padding: 7px;
+         border-radius: 5px;
+         font-size: 19px;
+         &:hover {
+            background-color: $secondary-primary;
+         }
+      }
+   }
+}

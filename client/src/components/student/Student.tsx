@@ -1,14 +1,13 @@
 import React from "react";
 
 interface StudentProps {
-  email: string;
+  email?: string;
 }
 
 const Student: React.FC<StudentProps> = props => {
-  const { email } = props;
   return (
     <React.Fragment>
-      <p>{email}</p>
+      <p>Student detail page</p>
     </React.Fragment>
   );
 };
