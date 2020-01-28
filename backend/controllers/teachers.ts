@@ -92,32 +92,35 @@ export const register = async (req: RegistrationRequestVariables, res: any) => {
 export const getCommonStudents = async (req: StudentListQueryVariables, res: any) => {
   const { teacher } = req.query;
 
+  let teacherData: any;
+
   if (!isArray(teacher)) {
-    try {
-      const givenTeacher = Teacher.query().where('email', teacher);
-      const commonstudents = await Teacher.relatedQuery('students').for(givenTeacher);
-  
-      res.status(200).json({ students: commonstudents });
-    } catch (error) {
-      res.status(500).json({ message: 'An error occured while retrieving data' });
-    }
+    teacherData = await Teacher.query().where('email', teacher).column('id');
   } else {
-    try {
-      const givenTeachersPromises = teacher.map(async ( t: string ) => {
-        return await Teacher.query().where('email', t);
-      });
-  
-      const resolvedGivenTeachers = await Promise.all(givenTeachersPromises);
-      const givenTeachers = flatten(resolvedGivenTeachers);
-  
-      const teachersIds = givenTeachers.map(( teacher: Teacher ) => teacher.id );
-  
-      const commonStudents = await Teacher.relatedQuery('students').for(teachersIds)
-  
-      res.status(200).json({ students: commonStudents });
-    } catch (error) {
-      res.status(500).json({ message: 'An error occured while retrieving data' });
-    }
+
+    let fetchedTeacherIds: any = teacher.map(( t: string ) => {
+      return Teacher
+              .query()
+              .where('email', t)
+              .column('id');
+    });
+
+    fetchedTeacherIds = await Promise.all(fetchedTeacherIds);
+
+    teacherData = flatten(fetchedTeacherIds);
+    teacherData = teacherData.map(( teacherId: Teacher ) => teacherId.id );
+  }
+
+  try {
+    let registeredStudents: Student[] | string[] = await Teacher
+                                                          .relatedQuery('students')
+                                                          .distinct('email')
+                                                          .for(teacherData);
+    registeredStudents = registeredStudents.map(( student: Student ) => student.email );
+
+    res.status(200).json({ students: registeredStudents });
+  } catch (error) {
+    res.status(500).json({ message: 'An error occured while retrieving data' });
   }
 
 };
