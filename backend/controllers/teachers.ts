@@ -146,25 +146,26 @@ export const suspendStudent = async (req: SuspendRequestVariables, res: any) => 
       unrelate: ["students"]
     };
     
-    try {
-      const isStudentExists = await SuspendedStudent.query().select().where('student_id', id);
-      if (isStudentExists.length > 0) {
-        res.status(400).json({ message: 'Student is already suspended' });
-      } 
-      else {
+  
+    const isStudentExists = await SuspendedStudent.query().select().where('student_id', id);
+    if (isStudentExists.length > 0) {
+      res.status(400).json({ message: 'Student is already suspended' });
+    } 
+    else {
+      try {
         const result = await SuspendedStudent.suspend(input, options);
         result && res.status(204).send();
+      } catch (error) {
+        res
+          .status(500)
+          .json({ message: "An error occurred while suspending student." });
       }
-    } catch (error) {
-      res
-        .status(500)
-        .json({ message: "An error occurred while suspending student." });
     }
   }
 
 }
 
-export const createNotification = async (req: CreateNotificationReqVariables, res: any) => {
+export const retrieveNotifications = async (req: CreateNotificationReqVariables, res: any) => {
   const { teacher, notification } = req.body;
 
   const isTeacherExists = await Teacher.query().where('email', teacher);
@@ -172,38 +173,44 @@ export const createNotification = async (req: CreateNotificationReqVariables, re
   if (isTeacherExists.length === 0) {
     res.status(400).json({ message: `Unable to create notification, teacher ${teacher} not found` });
   } else {
-    let studentsEmails: any = notification.split(' ');
-    studentsEmails = studentsEmails
+    const { students: registeredStudents }: any = await isTeacherExists[0].$query().withGraphFetched('students');
+
+    let studentsMentions: any = notification.split(' ');
+    studentsMentions = studentsMentions
                         .filter(( word: string ) => word.includes('@'))
                         .map(( email: string ) => ( email.slice(1) ));
-                        
-    let studentsInMessage = studentsEmails.map( async ( email: string ) => await Student.query().where('email', email));
-    studentsInMessage = await Promise.all(studentsInMessage);
-    studentsInMessage = flatten(studentsInMessage);
+    
+    let fetchedMentionedStudents = studentsMentions.map( async ( email: string ) => await Student.query().where('email', email));
+    fetchedMentionedStudents = await Promise.all(fetchedMentionedStudents);
+    fetchedMentionedStudents = flatten(fetchedMentionedStudents);
+    
+    const studentsToCheck = [ ...fetchedMentionedStudents, ...registeredStudents ];
 
-    const studentsNotSuspended = studentsInMessage
-                                    .filter(( student: StudentInterface ) => !student.is_suspended)
-                                    .map(( student: StudentInterface ) => ({ id: student.id, email: student.email }));
+    const studentsToNotify = studentsToCheck
+      .filter(( student: StudentInterface ) => !student.is_suspended)
+      .map(( student: StudentInterface ) => ({ id: student.id, email: student.email }));
 
     const input: NotificationInput = {
       teacher_id: isTeacherExists[0].id,
       message: notification,
-      students: studentsNotSuspended
+      students: studentsToNotify
     };
 
     const options = {
       relate: ["teachers", "students"],
       unrelate: ["teachers", "students"]
     };
-
+    
     try {
-      const result = await Notification.createNotification(input, options);
-      result && res.status(204).send();
+      const { id: notificationId }: Notification = await Notification.createNotification(input, options);
+      if (notificationId) {
+        const notification: Notification = await Notification.retrievefornotifications(notificationId);
+        notification && res.status(200).json({ recipients: notification.students });
+      }
     } catch (error) {
       res
         .status(500)
         .json({ message: 'An error occured while creating notification' });
     }
   }
-
 }
