@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Backdrop from "@material-ui/core/Backdrop";
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles, Theme } from "@material-ui/core/styles";
@@ -9,7 +9,7 @@ import useGetStudentData from '../../hooks/useGetStudentData';
 import "./teacher.scss";
 
 interface TeacherProps {
-  email?: string;
+  data?: any
 }
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -33,14 +33,12 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }));
 
-
-
-const Teacher: React.FC<TeacherProps> = ({ email }) => {
+const Teacher: React.FC<TeacherProps> = (props) => {
   const classes = useStyles();
-  const [ teachers, setTeachers ] = useState([]);
+
   const { teacherData, teacherLoading } = useGetTeacherData(`/api/teachers`);
   const { studentData, studentLoading } = useGetStudentData(`/api/students`);
-
+  
   const isLoading = teacherLoading && studentLoading ? true : false;
 
   return (
@@ -56,11 +54,13 @@ const Teacher: React.FC<TeacherProps> = ({ email }) => {
       
       {!isLoading && (
         <div className={classes.root}>
+
           <CardComponent />
 
           <div className={classes.tabComponents}>
-            <TabComponent />
+            <TabComponent studentData={studentData} teacherData={teacherData} />
           </div>
+
         </div>
       )}
     </React.Fragment>

@@ -17,14 +17,14 @@ const App: React.FC = () => {
               exact
               path="/teacher"
               render={props => (
-                <Teacher {...props} email={"teacherOne@mail.com"} />
+                <Teacher data={props}/>
               )}
             />
             <Route
               exact
               path="/student"
               render={props => (
-                <Student {...props} email={"studentOne@mail.com"} />
+                <Student data={props} />
               )}
             />
           </Switch>

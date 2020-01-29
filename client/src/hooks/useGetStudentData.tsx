@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const useGetStudent = (url: string, ) => {
-  const [ studentData, setStudentData ] = useState(null);
+  const [ studentData, setStudentData ] = useState([]);
   const [ studentLoading, setStudentLoading ] = useState(true);
 
   async function fetchData() {
@@ -10,8 +10,8 @@ const useGetStudent = (url: string, ) => {
 
     if (result) {
       const { data } = result;
-
-      setStudentData(data);
+      const student = data.students
+      setStudentData(student);
       setStudentLoading(false);
     } else {
        console.log("error in fetching result", result);

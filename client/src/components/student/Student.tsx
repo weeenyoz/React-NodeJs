@@ -1,7 +1,7 @@
 import React from "react";
 
 interface StudentProps {
-  email?: string;
+  data?: any;
 }
 
 const Student: React.FC<StudentProps> = props => {
