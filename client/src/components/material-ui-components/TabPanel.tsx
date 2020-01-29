@@ -6,12 +6,11 @@ interface TabPanelProps {
   children?: React.ReactNode;
   index: any;
   value: any;
-  width?: string;
 }
 
 const TabPanelComponent: React.SFC<TabPanelProps> = (props: TabPanelProps) => {
-  const { children, value, index, width } = props;
-
+  const { children, value, index } = props;
+  
   return (
     <Box
       component="div"

@@ -6,6 +6,11 @@ import CardComponent from "../material-ui-components/Card";
 import TabComponent from "../material-ui-components/Tab";
 import useGetTeacherData from '../../hooks/useGetTeacherData';
 import useGetStudentData from '../../hooks/useGetStudentData';
+import TabPanelComponent from "../material-ui-components/TabPanel";
+import RegisterStudentForm from "../RegisterStudentForm";
+import RetrieveStudentForm from "../RetrieveStudentForm";
+import SuspendStudentForm from "../SuspendStudentForm";
+import RetrieveNotifiedStudentForm from "../RetrieveNotifiedStudentForm";
 import "./teacher.scss";
 
 interface TeacherProps {
@@ -39,8 +44,15 @@ const Teacher: React.FC<TeacherProps> = (props) => {
   const { teacherData, teacherLoading } = useGetTeacherData(`/api/teachers`);
   const { studentData, studentLoading } = useGetStudentData(`/api/students`);
   
+  const labels = [ "Register Students", "Retrieve Common Students", "Suspend Students", "Retrieve Notified Students" ];
   const isLoading = teacherLoading && studentLoading ? true : false;
 
+  const [value, setValue] = React.useState(0);
+
+  const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setValue(newValue);
+  };
+  
   return (
     <React.Fragment>
       {isLoading && (
@@ -58,7 +70,28 @@ const Teacher: React.FC<TeacherProps> = (props) => {
           <CardComponent />
 
           <div className={classes.tabComponents}>
-            <TabComponent studentData={studentData} teacherData={teacherData} />
+            <TabComponent 
+              value={value} 
+              changeHandler={handleChange}
+              labels={[...labels]}
+            />
+              
+              <TabPanelComponent value={value} index={0}>
+                <RegisterStudentForm studentData={studentData} teacherData={teacherData} />
+              </TabPanelComponent>
+
+              <TabPanelComponent value={value} index={1}>
+                <RetrieveStudentForm />
+              </TabPanelComponent>
+
+              <TabPanelComponent value={value} index={2}>
+                <SuspendStudentForm />
+              </TabPanelComponent>
+
+              <TabPanelComponent value={value} index={3}>
+                <RetrieveNotifiedStudentForm />
+              </TabPanelComponent>
+              
           </div>
 
         </div>

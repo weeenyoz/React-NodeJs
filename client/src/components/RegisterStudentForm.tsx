@@ -14,15 +14,16 @@ import Input from "@material-ui/core/Input";
 import useRegisterStudents from '../hooks/useRegisterStudents';
 
 interface RegisterStudentFormProps {
-  data?: any;
+  studentData: any;
+  teacherData: any;
 }
 
-export interface TeacherSelectFieldInterface {
+interface TeacherSelectFieldInterface {
   id: number
   email: string
 }
 
-export type StudentSelectFieldInterface = TeacherSelectFieldInterface[]
+type StudentSelectFieldInterface = TeacherSelectFieldInterface[]
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -53,7 +54,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const RegisterStudentForm: React.FC<RegisterStudentFormProps> = props => {
   const classes = useStyles();
-  const { studentData, teacherData } = props.data;
+  const { studentData, teacherData } = props;
 
   const [ newTeacher, setNewTeacher ] = useState<string>('');
   const [ newStudents, setNewStudents ] = useState<string[]>([]);
@@ -186,6 +187,7 @@ const RegisterStudentForm: React.FC<RegisterStudentFormProps> = props => {
               <Select
                 value={selectedTeacher}
                 onChange={handleSelectTeacherChange}
+                MenuProps={MenuProps}
               >
                 <MenuItem value="">
                   <em>Choose an existing teacher</em>

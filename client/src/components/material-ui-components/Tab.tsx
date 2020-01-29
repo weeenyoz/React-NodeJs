@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { makeStyles, Theme } from "@material-ui/core/styles";
-import TabPanelComponent from "./TabPanel";
 import { Tabs, Tab } from "@material-ui/core";
-import RegisterStudentForm from "../RegisterStudentForm";
-import RetrieveStudentForm from "../RetrieveStudentForm";
-import SuspendStudentForm from "../SuspendStudentForm";
-import RetrieveNotifiedStudentForm from "../RetrieveNotifiedStudentForm";
 
 interface TagComponentProps {
-  studentData: any[]
-  teacherData: any[]
+  changeHandler: (e: React.ChangeEvent<{}>, value: number) => void
+  value: number
+  labels: string[]
 }
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -24,9 +20,8 @@ const useStyles = makeStyles((theme: Theme) => ({
 const TabComponent: React.FC<TagComponentProps> = (props) => {
   const classes = useStyles();
   
-  const { studentData, teacherData } = props;
-  const [value, setValue] = React.useState(0);
-  const [tabIndex, setTabIndex] = useState<object>({ id: `` });
+  const { value, changeHandler, labels } = props;
+  const [ tabIndex, setTabIndex ] = useState<object>({ id: `` });
 
   useEffect(() => {
     setTabIndex({
@@ -35,52 +30,17 @@ const TabComponent: React.FC<TagComponentProps> = (props) => {
     });
   }, [value]);
 
-  const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-   setValue(newValue);
-  };
-
   return (
     <React.Fragment>
       <Tabs
         orientation="vertical"
         variant="scrollable"
         value={value}
-        onChange={handleChange}
+        onChange={(e, value) => changeHandler(e, value)}
         className={classes.tabs}
       >
-        <Tab className={classes.tab} label="Register Students" {...tabIndex} />
-        
-        <Tab
-          className={classes.tab}
-          label="Retrieve Common Students"
-          {...tabIndex}
-        />
-        
-        <Tab className={classes.tab} label="Suspend Students" {...tabIndex} />
-        
-        <Tab
-          className={classes.tab}
-          label="Retrieve Notified Students"
-          {...tabIndex}
-        />
+        { labels.map(( label: string ) => <Tab className={classes.tab}  label={label} {...tabIndex} />) }
       </Tabs>
-
-      <TabPanelComponent value={value} index={0}>
-        <RegisterStudentForm data={props} />
-      </TabPanelComponent>
-
-      <TabPanelComponent value={value} index={1}>
-        <RetrieveStudentForm />
-      </TabPanelComponent>
-
-      <TabPanelComponent value={value} index={2}>
-        <SuspendStudentForm />
-      </TabPanelComponent>
-
-      <TabPanelComponent value={value} index={3}>
-        <RetrieveNotifiedStudentForm />
-      </TabPanelComponent>
-
     </React.Fragment>
   );
 };
