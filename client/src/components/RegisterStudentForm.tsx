@@ -17,12 +17,12 @@ interface RegisterStudentFormProps {
   data?: any;
 }
 
-interface TeacherSelectFieldInterface {
+export interface TeacherSelectFieldInterface {
   id: number
   email: string
 }
 
-type StudentSelectFieldInterface = TeacherSelectFieldInterface[]
+export type StudentSelectFieldInterface = TeacherSelectFieldInterface[]
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
