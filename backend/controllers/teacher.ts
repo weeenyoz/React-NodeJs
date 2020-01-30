@@ -5,15 +5,6 @@ import SuspendedStudent from '../models/SuspendedStudents';
 import Notification, { NotificationInterface } from '../models/Notifications';
 import { isArray } from "util";
 
-interface RegistrationVariables {
-  teacher: { id: number; email: string } | string;
-  students: Array<{ id: number; email: string }> | string[];
-}
-
-interface SuspendVariables {
-  student: StudentInterface['email'];
-}
-
 interface CreateBodyVariables<TBodyVariables> {
   body: TBodyVariables;
 }
@@ -22,20 +13,35 @@ interface CreateQueryVariables<TQueryVariables> {
   query: TQueryVariables;
 }
 
-type RegistrationRequestVariables = CreateBodyVariables<RegistrationVariables>;
+type RegisterNewTeacherInput = TeacherInterface['email']
+type RegisterExistingTeacherInput = Omit<TeacherInterface, 'students' | 'notifications'>
 
-type SuspendRequestVariables = CreateBodyVariables<SuspendVariables>
+type RegisterNewStudentsInput = StudentInterface['email'][]
+type RegisterExistingStudentsInput = Pick<StudentInterface, 'id' | 'email'>[]
+
+interface RegistrationVariables {
+  teacher: RegisterExistingTeacherInput | RegisterNewTeacherInput;
+  students: RegisterExistingStudentsInput | RegisterNewStudentsInput;
+}
+
+interface SuspendVariables {
+  student: StudentInterface['email'];
+}
 
 interface StudentListVariables {
   teacher: string | string[];
 }
 
-type StudentListQueryVariables = CreateQueryVariables<StudentListVariables>
-
 interface CreateNotificationVariables {
   teacher: TeacherInterface['email'];
   notification: NotificationInterface['message'];
 }
+
+type RegistrationRequestVariables = CreateBodyVariables<RegistrationVariables>;
+
+type SuspendRequestVariables = CreateBodyVariables<SuspendVariables>
+
+type StudentListQueryVariables = CreateQueryVariables<StudentListVariables>
 
 type CreateNotificationReqVariables = CreateBodyVariables<CreateNotificationVariables>
 
@@ -44,17 +50,23 @@ type NotificationRetrieveReqVariables = CreateNotificationReqVariables
 interface NotificationInput {
   teacher_id: NotificationInterface['teacherId'],
   message: NotificationInterface['message'],
-  students: Array<{ email: string }> | string[];
+  students: Array<Pick<StudentInterface, 'email'>> | Array<StudentInterface['email']>
 }
 
-export const getAll = async (req: any, res: any) => {
-  const teachers = await Teacher.query();
-  teachers && res.send(teachers);
+export const getTeachers = async (req: any, res: any) => {
+  const teachers = await Teacher.query().column('id', 'email');
+  teachers && res.status(200).json({ teachers });
 };
+
+export const getTeacher = async (req: any, res: any) => {
+  const teacher = await Teacher.query().findById(req.params.id).column('id', 'email');
+  const { id, email } = teacher;
+  teacher && res.status(200).json({ id, email });
+}
 
 export const register = async (req: RegistrationRequestVariables, res: any) => {
   const { teacher, students } = req.body;
-
+  
   const email = typeof teacher === 'object' ? teacher.email : teacher;
   const id = typeof teacher === 'object' ? teacher.id : undefined;
 

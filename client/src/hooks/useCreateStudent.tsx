@@ -8,8 +8,7 @@ const useCreateStudent = () => {
   const [students, setStudents] = useState<Student[]>([]);
 
   const createStudent = (email: string) => {
-    const nextTodos: Student[] = [...students, { email }]
-    setStudents(nextTodos);
+    console.log('inside useCreateStudent\'s hook createStudent method')
   };
 
   return { students, createStudent }
