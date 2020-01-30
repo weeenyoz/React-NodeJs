@@ -1,4 +1,4 @@
-# ufinity-assignment
+# technical-assignment
 
 ### Running the server
 ```
