@@ -12,6 +12,7 @@ import Grid from "@material-ui/core/Grid";
 import Chip from "@material-ui/core/Chip";
 import Input from "@material-ui/core/Input";
 import useRegisterStudents from '../hooks/useRegisterStudents';
+import SelectComponent from './material-ui-components/Select';
 
 interface RegisterStudentFormProps {
   studentData: any;
@@ -82,6 +83,7 @@ const RegisterStudentForm: React.FC<RegisterStudentFormProps> = props => {
       setNewTeacher('');
       setSelectedTeacher(undefined);
       studentsInputValue = ''
+      console.log('selected teacher in effect ', selectedTeacher)
     }
   }, [isRegistered]);
 
@@ -93,6 +95,7 @@ const RegisterStudentForm: React.FC<RegisterStudentFormProps> = props => {
   };
 
   const handleSelectTeacherChange = (event: any) => {
+    console.log('on change', event.target.value);
      const { value } = event.target;
 
      setSelectedTeacher(value);
@@ -184,7 +187,16 @@ const RegisterStudentForm: React.FC<RegisterStudentFormProps> = props => {
                 Select Teacher
               </InputLabel>
               
-              <Select
+              {console.log('selected teacher in return ', selectedTeacher)}
+              <SelectComponent 
+                data={teacherData}
+                selectedValue={selectedTeacher}
+                changeHandler={handleSelectTeacherChange}
+                registeredStatus={isRegistered}
+              />
+
+
+              {/* <Select
                 value={selectedTeacher}
                 onChange={handleSelectTeacherChange}
                 MenuProps={MenuProps}
@@ -199,7 +211,7 @@ const RegisterStudentForm: React.FC<RegisterStudentFormProps> = props => {
                   </MenuItem>
                 ))}
               
-              </Select>
+              </Select> */}
 
             </FormControl>
           </Grid>
