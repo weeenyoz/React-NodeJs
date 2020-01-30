@@ -1,29 +1,21 @@
 import React, { useState, useEffect } from "react";
-import axios from 'axios';
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import Button from '@material-ui/core/Button';
 import TextField from "@material-ui/core/TextField";
-import Select from "@material-ui/core/Select";
 import Grid from "@material-ui/core/Grid";
-import Chip from "@material-ui/core/Chip";
-import Input from "@material-ui/core/Input";
 import useRegisterStudents from '../hooks/useRegisterStudents';
+import SelectComponent, { SelectFieldInterface } from './material-ui-components/Select';
 
 interface RegisterStudentFormProps {
   studentData: any;
   teacherData: any;
 }
 
-interface TeacherSelectFieldInterface {
-  id: number
-  email: string
-}
-
-type StudentSelectFieldInterface = TeacherSelectFieldInterface[]
+type TeacherSelectFieldInterface = SelectFieldInterface
+type StudentSelectFieldInterface = SelectFieldInterface[]
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -38,16 +30,6 @@ const useStyles = makeStyles((theme: Theme) =>
       width: "80%",
       minWidth: 120
     },
-    selectEmpty: {
-      marginTop: theme.spacing(2)
-    },
-    chips: {
-      display: "flex",
-      flexWrap: "wrap"
-    },
-    chip: {
-      margin: 2
-    }
   })
 );
 
@@ -65,37 +47,24 @@ const RegisterStudentForm: React.FC<RegisterStudentFormProps> = props => {
   
   let studentsInputValue: string | undefined ;
 
-  const MenuProps = {
-    PaperProps: {
-      style: {
-        maxHeight: 48 * 4.5 + 8,
-        width: 250
-      }
-    }
-  };
-
   useEffect(() => {
     if (isRegistered) {
       alert('Registration Successful');
       setNewStudents([]);
       setSelectedStudents([]);
       setNewTeacher('');
-      setSelectedTeacher(undefined);
+      setSelectedTeacher({id: undefined, email: ''});
       studentsInputValue = ''
     }
   }, [isRegistered]);
 
-  const handleSelectStudentChange = (event: any) => {
-    const { value } = event.target;
-
+  const handleSelectStudentChange = (value: any) => {
     const studentsToRegister = [...value];
     setSelectedStudents(studentsToRegister);
-  };
+  }
 
-  const handleSelectTeacherChange = (event: any) => {
-     const { value } = event.target;
-
-     setSelectedTeacher(value);
+  const handleSelectTeacherChange = (value: any) => {
+    setSelectedTeacher(value);
   }
 
   const handleNewStudentsChange = (event: any) => {
@@ -183,68 +152,33 @@ const RegisterStudentForm: React.FC<RegisterStudentFormProps> = props => {
               <InputLabel>
                 Select Teacher
               </InputLabel>
-              
-              <Select
-                value={selectedTeacher}
-                onChange={handleSelectTeacherChange}
-                MenuProps={MenuProps}
-              >
-                <MenuItem value="">
-                  <em>Choose an existing teacher</em>
-                </MenuItem>
-                
-                { teacherData.map(( data: any ) => (
-                  <MenuItem value={data} key={data.id}>
-                     {data.email}
-                  </MenuItem>
-                ))}
-              
-              </Select>
+
+              <SelectComponent 
+                data={teacherData}
+                isMulti={false}
+                changeHandler={handleSelectTeacherChange}
+                selectedValue={selectedTeacher}
+                />
 
             </FormControl>
           </Grid>
 
           {/* Select Students */}
           <Grid item xs={12} md={6}>
-            <FormControl className={classes.formControl}>
-              
-              <InputLabel>
-                Select Students
-              </InputLabel>
+              <FormControl className={classes.formControl}>
 
-              <Select
-                value={selectedStudents}
-                onChange={handleSelectStudentChange}
-                multiple
-                input={<Input id="select-multiple-chip" />}
-                renderValue={selected => (
-                  <div className={classes.chips}>
-                    {(selected as {id: number, email: string}[]).map((value: {id: number, email: string}) => (
-                      <React.Fragment>
-                        <Chip
-                          key={value.id}
-                          label={value.email}
-                          className={classes.chip}
-                        />
-                      </React.Fragment>
-                    ))}
-                  </div>
-                )}
-                MenuProps={MenuProps}
-              >
-                <MenuItem value="">
-                  <em>Choose an existing student</em>
-                </MenuItem>
-                
-                {studentData.map((data: any) => ( 
-                  <MenuItem value={data} key={data.id}>
-                    {data.email}
-                  </MenuItem>
-                ))}
-              
-              </Select>
+                <InputLabel>
+                  Select Students
+                </InputLabel>
 
-            </FormControl>
+                <SelectComponent 
+                  data={studentData}
+                  isMulti={true}
+                  changeHandler={handleSelectStudentChange}
+                  selectedValue={selectedStudents}
+                />
+
+              </FormControl>
           </Grid>
         
         </Grid>

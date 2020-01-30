@@ -11,7 +11,6 @@ import RegisterStudentForm from "../RegisterStudentForm";
 import RetrieveStudentForm from "../RetrieveStudentForm";
 import SuspendStudentForm from "../SuspendStudentForm";
 import RetrieveNotifiedStudentForm from "../RetrieveNotifiedStudentForm";
-import "./teacher.scss";
 
 interface TeacherProps {
   data?: any
