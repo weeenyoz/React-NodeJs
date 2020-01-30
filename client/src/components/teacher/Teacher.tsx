@@ -79,7 +79,8 @@ const Teacher: React.FC<RouteComponentProps> = (props) => {
               </TabPanelComponent>
 
               <TabPanelComponent value={value} index={1}>
-                <RetrieveStudentForm teacherData={teacherData} {...props}/>
+                {/* <RetrieveStudentForm teacherData={teacherData} {...props}/> */}
+                <RetrieveStudentForm/>
               </TabPanelComponent>
 
               <TabPanelComponent value={value} index={2}>

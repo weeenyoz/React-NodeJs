@@ -4,7 +4,7 @@ import "./App.scss";
 import NavBar from "./components/navbar/NavBar";
 import Teacher from "./components/teacher/Teacher";
 import Student from "./components/student/Student";
-import Students from "./components/student/Students";
+// import Students from "./components/student/Students";
 
 const App: React.FC = () => {
   return (
@@ -23,10 +23,10 @@ const App: React.FC = () => {
               path="/student"
               render={props => <Student data={props} />}
             />
-            <Route
+            {/* <Route
               path="/commonstudents"
               render={props => <Students {...props}/>}
-            />
+            /> */}
           </Switch>
         </main>
       </Router>
