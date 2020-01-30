@@ -4,9 +4,9 @@ import "./App.scss";
 import NavBar from "./components/navbar/NavBar";
 import Teacher from "./components/teacher/Teacher";
 import Student from "./components/student/Student";
+import Students from "./components/student/Students";
 
 const App: React.FC = () => {
-  
   return (
     <React.Fragment>
       <Router>
@@ -16,16 +16,16 @@ const App: React.FC = () => {
             <Route
               exact
               path="/teacher"
-              render={props => (
-                <Teacher data={props}/>
-              )}
+              render={props => <Teacher {...props} />}
             />
             <Route
               exact
               path="/student"
-              render={props => (
-                <Student data={props} />
-              )}
+              render={props => <Student data={props} />}
+            />
+            <Route
+              path="/commonstudents"
+              render={props => <Students {...props}/>}
             />
           </Switch>
         </main>

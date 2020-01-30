@@ -14,7 +14,7 @@ interface RegisterStudentFormProps {
   teacherData: any;
 }
 
-type TeacherSelectFieldInterface = SelectFieldInterface
+export type TeacherSelectFieldInterface = SelectFieldInterface
 type StudentSelectFieldInterface = SelectFieldInterface[]
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -77,7 +77,7 @@ const RegisterStudentForm: React.FC<RegisterStudentFormProps> = props => {
      studentsInputValue = newStudents.toString();
   }
 
-  const handSubmit = async (event: any) => {
+  const handleSubmit = async (event: any) => {
    event.preventDefault();
 
    let teacher: string | TeacherSelectFieldInterface | undefined;
@@ -109,7 +109,7 @@ const RegisterStudentForm: React.FC<RegisterStudentFormProps> = props => {
 
   return (
     <div>
-      <form className={classes.root} onSubmit={handSubmit}>
+      <form className={classes.root} onSubmit={handleSubmit}>
         <Grid container>
 
           {/* New Teacher Input */}
@@ -158,7 +158,7 @@ const RegisterStudentForm: React.FC<RegisterStudentFormProps> = props => {
                 isMulti={false}
                 changeHandler={handleSelectTeacherChange}
                 selectedValue={selectedTeacher}
-                />
+              />
 
             </FormControl>
           </Grid>

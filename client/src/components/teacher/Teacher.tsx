@@ -2,6 +2,7 @@ import React from "react";
 import Backdrop from "@material-ui/core/Backdrop";
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles, Theme } from "@material-ui/core/styles";
+import { RouteComponentProps } from "react-router-dom";
 import CardComponent from "../material-ui-components/Card";
 import TabComponent from "../material-ui-components/Tab";
 import useGetTeacherData from '../../hooks/useGetTeacherData';
@@ -11,10 +12,6 @@ import RegisterStudentForm from "../RegisterStudentForm";
 import RetrieveStudentForm from "../RetrieveStudentForm";
 import SuspendStudentForm from "../SuspendStudentForm";
 import RetrieveNotifiedStudentForm from "../RetrieveNotifiedStudentForm";
-
-interface TeacherProps {
-  data?: any
-}
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -37,8 +34,10 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }));
 
-const Teacher: React.FC<TeacherProps> = (props) => {
+const Teacher: React.FC<RouteComponentProps> = (props) => {
   const classes = useStyles();
+
+  console.log('props', props);
 
   const { teacherData, teacherLoading } = useGetTeacherData(`/api/teachers`);
   const { studentData, studentLoading } = useGetStudentData(`/api/students`);
@@ -80,7 +79,7 @@ const Teacher: React.FC<TeacherProps> = (props) => {
               </TabPanelComponent>
 
               <TabPanelComponent value={value} index={1}>
-                <RetrieveStudentForm />
+                <RetrieveStudentForm teacherData={teacherData} {...props}/>
               </TabPanelComponent>
 
               <TabPanelComponent value={value} index={2}>
