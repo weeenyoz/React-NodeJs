@@ -1,17 +1,21 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import "./App.scss";
+import { MuiThemeProvider } from "@material-ui/core/styles";
 import NavBar from "./components/navbar/NavBar";
 import Teacher from "./components/teacher/Teacher";
 import Student from "./components/student/Student";
-// import Students from "./components/student/Students";
+import Login from "./components/LoginForm";
+import theme from './theme'
 
 const App: React.FC = () => {
   return (
     <React.Fragment>
       <Router>
-        <main className="app-container">
+        
+        <MuiThemeProvider theme={theme}>
+          
           <NavBar />
+          
           <Switch>
             <Route
               exact
@@ -23,12 +27,10 @@ const App: React.FC = () => {
               path="/student"
               render={props => <Student data={props} />}
             />
-            {/* <Route
-              path="/commonstudents"
-              render={props => <Students {...props}/>}
-            /> */}
           </Switch>
-        </main>
+        
+        </MuiThemeProvider>
+      
       </Router>
     </React.Fragment>
   );
