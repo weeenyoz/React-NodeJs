@@ -5,7 +5,7 @@ import NavBar from "./components/navbar/NavBar";
 import Teacher from "./components/teacher/Teacher";
 import Student from "./components/student/Student";
 import Login from "./components/LoginForm";
-import theme from './theme'
+import theme from './theme';
 
 const App: React.FC = () => {
   return (

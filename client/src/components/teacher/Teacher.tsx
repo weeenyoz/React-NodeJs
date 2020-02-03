@@ -3,7 +3,6 @@ import Backdrop from "@material-ui/core/Backdrop";
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles, Theme } from "@material-ui/core/styles";
 import { RouteComponentProps } from "react-router-dom";
-import CardComponent from "../material-ui-components/Card";
 import TabComponent from "../material-ui-components/Tab";
 import useGetTeacherData from '../../hooks/useGetTeacherData';
 import useGetStudentData from '../../hooks/useGetStudentData';
@@ -18,7 +17,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     flexGrow: 1,
     backgroundColor: theme.palette.background.paper,
     height: "100%",
-    padding: "0 80px"
+    padding: theme.spacing(0, 10),
   },
   tabComponents: {
     display: "flex",
@@ -36,8 +35,6 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 const Teacher: React.FC<RouteComponentProps> = (props) => {
   const classes = useStyles();
-
-  console.log('props', props);
 
   const { teacherData, teacherLoading } = useGetTeacherData(`/api/teachers`);
   const { studentData, studentLoading } = useGetStudentData(`/api/students`);
@@ -64,8 +61,6 @@ const Teacher: React.FC<RouteComponentProps> = (props) => {
       
       {!isLoading && (
         <div className={classes.root}>
-
-          <CardComponent />
 
           <div className={classes.tabComponents}>
             <TabComponent 
