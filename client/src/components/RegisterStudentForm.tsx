@@ -4,10 +4,10 @@ import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import Button from '@material-ui/core/Button';
-import TextField from "@material-ui/core/TextField";
 import Grid from "@material-ui/core/Grid";
 import useRegisterStudents from '../hooks/useRegisterStudents';
 import SelectComponent, { SelectFieldInterface } from './material-ui-components/Select';
+import TextFieldInputComponent from './material-ui-components/TextFieldInput';
 
 interface RegisterStudentFormProps {
   studentData: any;
@@ -67,8 +67,7 @@ const RegisterStudentForm: React.FC<RegisterStudentFormProps> = props => {
     setSelectedTeacher(value);
   }
 
-  const handleNewStudentsChange = (event: any) => {
-     const { value } = event.target;
+  const handleNewStudentsChange = (value: any) => {
 
      // replaces carriage return with a space, then splits the string into an array of strings
      let newStudentsToRegister = value.replace(/[\n\r]+/g, ' ').split(" ");
@@ -77,7 +76,12 @@ const RegisterStudentForm: React.FC<RegisterStudentFormProps> = props => {
      studentsInputValue = newStudents.toString();
   }
 
-  const handleSubmit = async (event: any) => {
+  const handleNewTeacherChange = (value: any) => {
+    console.log('value in new teacehr change: ', value)
+    setNewTeacher(value);
+  }
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
    event.preventDefault();
 
    let teacher: string | TeacherSelectFieldInterface | undefined;
@@ -115,14 +119,14 @@ const RegisterStudentForm: React.FC<RegisterStudentFormProps> = props => {
           {/* New Teacher Input */}
           <Grid item xs={12} md={6}>
             <FormControl className={classes.formControl}>
-              
-              <TextField
-                id="outlined-basic"
+
+              <TextFieldInputComponent
                 label="New Teacher"
                 variant="outlined"
                 type="email"
-                onChange={(e: any) => setNewTeacher(e.target.value)}
+                changeHandler={handleNewTeacherChange}
                 value={newTeacher}
+                isMulti={false}
               />
             
             </FormControl>
@@ -132,15 +136,16 @@ const RegisterStudentForm: React.FC<RegisterStudentFormProps> = props => {
           <Grid item xs={12} md={6}>
             <FormControl className={classes.formControl}>
               
-              <TextField
+              <TextFieldInputComponent
                 label="New Students"
                 variant="outlined"
                 type="email"
-                multiline
                 rowsMax="4"
-                onChange={handleNewStudentsChange}
-                value={studentsInputValue && studentsInputValue}
+                changeHandler={handleNewStudentsChange}
+                value={studentsInputValue}
+                isMulti={true}
               />
+
             <FormHelperText>Hit Enter for a new line</FormHelperText>
             </FormControl>
           </Grid>
