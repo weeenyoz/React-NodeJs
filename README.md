@@ -1,4 +1,4 @@
-# ufinity-assignment
+# React Node Proj 1
 
 ### Running the server
 ```
