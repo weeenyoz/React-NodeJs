@@ -1,4 +1,4 @@
-# React Node Proj 1
+# Technical assignment
 
 ### Running the server
 ```
