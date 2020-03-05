@@ -1,8 +1,8 @@
-import { flatten } from 'lodash';
+import { flatten } from "lodash";
 import Teacher, { TeacherInterface } from "../models/Teacher";
-import Student, { StudentInterface } from '../models/Student';
-import SuspendedStudent from '../models/SuspendedStudents';
-import Notification, { NotificationInterface } from '../models/Notifications';
+import Student, { StudentInterface } from "../models/Student";
+import SuspendedStudent from "../models/SuspendedStudents";
+import Notification, { NotificationInterface } from "../models/Notifications";
 import { isArray } from "util";
 
 interface RegistrationVariables {
@@ -11,7 +11,7 @@ interface RegistrationVariables {
 }
 
 interface SuspendVariables {
-  student: StudentInterface['email'];
+  student: StudentInterface["email"];
 }
 
 interface CreateBodyVariables<TBodyVariables> {
@@ -24,39 +24,45 @@ interface CreateQueryVariables<TQueryVariables> {
 
 type RegistrationRequestVariables = CreateBodyVariables<RegistrationVariables>;
 
-type SuspendRequestVariables = CreateBodyVariables<SuspendVariables>
+type SuspendRequestVariables = CreateBodyVariables<SuspendVariables>;
 
 interface StudentListVariables {
   teacher: string | string[];
 }
 
-type StudentListQueryVariables = CreateQueryVariables<StudentListVariables>
+type StudentListQueryVariables = CreateQueryVariables<StudentListVariables>;
 
 interface CreateNotificationVariables {
-  teacher: TeacherInterface['email'];
-  notification: NotificationInterface['message'];
+  teacher: TeacherInterface["email"];
+  notification: NotificationInterface["message"];
 }
 
-type CreateNotificationReqVariables = CreateBodyVariables<CreateNotificationVariables>
+type CreateNotificationReqVariables = CreateBodyVariables<
+  CreateNotificationVariables
+>;
 
-type NotificationRetrieveReqVariables = CreateNotificationReqVariables
+type NotificationRetrieveReqVariables = CreateNotificationReqVariables;
 
 interface NotificationInput {
-  teacher_id: NotificationInterface['teacherId'],
-  message: NotificationInterface['message'],
+  teacher_id: NotificationInterface["teacherId"];
+  message: NotificationInterface["message"];
   students: Array<{ email: string }> | string[];
 }
 
-export const getAll = async (req: any, res: any) => {
-  const teachers = await Teacher.query();
-  teachers && res.send(teachers);
+export const getAll = async (req: any, res: any, next: any) => {
+  try {
+    const teachers = await Teacher.query();
+    teachers && res.send(teachers);
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const register = async (req: RegistrationRequestVariables, res: any) => {
   const { teacher, students } = req.body;
 
-  const email = typeof teacher === 'object' ? teacher.email : teacher;
-  const id = typeof teacher === 'object' ? teacher.id : undefined;
+  const email = typeof teacher === "object" ? teacher.email : teacher;
+  const id = typeof teacher === "object" ? teacher.id : undefined;
 
   const isTeacherExists = await Teacher.query().where("email", email);
 
@@ -66,9 +72,11 @@ export const register = async (req: RegistrationRequestVariables, res: any) => {
     const input: object = {
       id,
       email,
-      students: (students as Array<{ id: number; email: string } | string>).map(
-        student => typeof student === "object" ?
-          { id: student.id && student.id, email: student.email }
+      students: (students as Array<
+        { id: number; email: string } | string
+      >).map(student =>
+        typeof student === "object"
+          ? { id: student.id && student.id, email: student.email }
           : { email: student }
       )
     };
@@ -89,51 +97,61 @@ export const register = async (req: RegistrationRequestVariables, res: any) => {
   }
 };
 
-export const getCommonStudents = async (req: StudentListQueryVariables, res: any) => {
+export const getCommonStudents = async (
+  req: StudentListQueryVariables,
+  res: any
+) => {
   const { teacher } = req.query;
 
   let teacherData: any;
 
   if (!isArray(teacher)) {
-    teacherData = await Teacher.query().where('email', teacher).column('id');
+    teacherData = await Teacher.query()
+      .where("email", teacher)
+      .column("id");
   } else {
-
-    let fetchedTeacherIds: any = teacher.map(( t: string ) => {
-      return Teacher
-              .query()
-              .where('email', t)
-              .column('id');
+    let fetchedTeacherIds: any = teacher.map((t: string) => {
+      return Teacher.query()
+        .where("email", t)
+        .column("id");
     });
 
     fetchedTeacherIds = await Promise.all(fetchedTeacherIds);
 
     teacherData = flatten(fetchedTeacherIds);
-    teacherData = teacherData.map(( teacherId: Teacher ) => teacherId.id );
+    teacherData = teacherData.map((teacherId: Teacher) => teacherId.id);
   }
 
   try {
-    let registeredStudents: Student[] | string[] = await Teacher
-                                                          .relatedQuery('students')
-                                                          .distinct('email')
-                                                          .for(teacherData);
-    registeredStudents = registeredStudents.map(( student: Student ) => student.email );
+    let registeredStudents: Student[] | string[] = await Teacher.relatedQuery(
+      "students"
+    )
+      .distinct("email")
+      .for(teacherData);
+    registeredStudents = registeredStudents.map(
+      (student: Student) => student.email
+    );
 
     res.status(200).json({ students: registeredStudents });
   } catch (error) {
-    res.status(500).json({ message: 'An error occured while retrieving data' });
+    res.status(500).json({ message: "An error occured while retrieving data" });
   }
-
 };
 
-export const suspendStudent = async (req: SuspendRequestVariables, res: any) => {
+export const suspendStudent = async (
+  req: SuspendRequestVariables,
+  res: any
+) => {
   const { student } = req.body;
 
-  const studentToSuspend = await Student.query().select().where('email', student).column('id', 'email')
+  const studentToSuspend = await Student.query()
+    .select()
+    .where("email", student)
+    .column("id", "email");
 
-  if ( studentToSuspend.length === 0 ) {
-    res.status(404).json({ message: 'No student found' });
-  } 
-  else {
+  if (studentToSuspend.length === 0) {
+    res.status(404).json({ message: "No student found" });
+  } else {
     const { id, email } = studentToSuspend[0];
 
     const input: object = {
@@ -141,7 +159,7 @@ export const suspendStudent = async (req: SuspendRequestVariables, res: any) => 
       students: {
         id,
         email,
-        is_suspended: true 
+        is_suspended: true
       }
     };
 
@@ -149,13 +167,13 @@ export const suspendStudent = async (req: SuspendRequestVariables, res: any) => 
       relate: ["students"],
       unrelate: ["students"]
     };
-    
-  
-    const isStudentExists = await SuspendedStudent.query().select().where('student_id', id);
+
+    const isStudentExists = await SuspendedStudent.query()
+      .select()
+      .where("student_id", id);
     if (isStudentExists.length > 0) {
-      res.status(400).json({ message: 'Student is already suspended' });
-    } 
-    else {
+      res.status(400).json({ message: "Student is already suspended" });
+    } else {
       try {
         const result = await SuspendedStudent.suspend(input, options);
         result && res.status(204).send();
@@ -166,42 +184,55 @@ export const suspendStudent = async (req: SuspendRequestVariables, res: any) => 
       }
     }
   }
+};
 
-}
-
-export const retrieveNotifications = async (req: CreateNotificationReqVariables, res: any) => {
+export const retrieveNotifications = async (
+  req: CreateNotificationReqVariables,
+  res: any
+) => {
   const { teacher, notification } = req.body;
 
-  const teacherData = await Teacher.query().column('id', 'email').where('email', teacher);
+  const teacherData = await Teacher.query()
+    .column("id", "email")
+    .where("email", teacher);
 
   if (teacherData.length === 0) {
-    res.status(400).json({ message: `Unable to create notification, teacher ${teacher} not found` });
-  } else {
-    const { students: registeredStudents }: any = await teacherData[0]
-                                                            .$query()
-                                                            .withGraphFetched('students') 
-
-    let studentsMentions: any = notification.split(' ');
-    studentsMentions = studentsMentions
-                        .filter(( word: string ) => word.includes('@'))
-                        .map(( email: string ) => ( email.slice(1) ));
-    
-    let fetchedMentionedStudents = studentsMentions.map( async ( email: string ) => {
-       return await Student
-                     .query()
-                     .column('id', 'email')
-                     .where('email', email)
+    res.status(400).json({
+      message: `Unable to create notification, teacher ${teacher} not found`
     });
+  } else {
+    const {
+      students: registeredStudents
+    }: any = await teacherData[0].$query().withGraphFetched("students");
+
+    let studentsMentions: any = notification.split(" ");
+    studentsMentions = studentsMentions
+      .filter((word: string) => word.includes("@"))
+      .map((email: string) => email.slice(1));
+
+    let fetchedMentionedStudents = studentsMentions.map(
+      async (email: string) => {
+        return await Student.query()
+          .column("id", "email")
+          .where("email", email);
+      }
+    );
 
     fetchedMentionedStudents = await Promise.all(fetchedMentionedStudents);
     fetchedMentionedStudents = flatten(fetchedMentionedStudents);
-    
-    const studentsToCheck = [ ...fetchedMentionedStudents, ...registeredStudents ];
-    
+
+    const studentsToCheck = [
+      ...fetchedMentionedStudents,
+      ...registeredStudents
+    ];
+
     const studentsToNotify = studentsToCheck
-    .filter(( student: StudentInterface ) => !student.is_suspended)
-    .map(( student: StudentInterface ) => ({ id: student.id, email: student.email }));
-    
+      .filter((student: StudentInterface) => !student.is_suspended)
+      .map((student: StudentInterface) => ({
+        id: student.id,
+        email: student.email
+      }));
+
     const input: NotificationInput = {
       teacher_id: teacherData[0].id,
       message: notification,
@@ -212,18 +243,24 @@ export const retrieveNotifications = async (req: CreateNotificationReqVariables,
       relate: ["teachers", "students"],
       unrelate: ["teachers", "students"]
     };
-    
+
     try {
-      const { id: notificationId }: Notification = await Notification.createNotification(input, options);
+      const {
+        id: notificationId
+      }: Notification = await Notification.createNotification(input, options);
       if (notificationId) {
-        const notification: Notification = await Notification.retrievefornotifications(notificationId);
-        const recipients = studentsToNotify.map(( student: any ) => student.email)
+        const notification: Notification = await Notification.retrievefornotifications(
+          notificationId
+        );
+        const recipients = studentsToNotify.map(
+          (student: any) => student.email
+        );
         notification && res.status(200).json({ recipients });
       }
     } catch (error) {
       res
         .status(500)
-        .json({ message: 'An error occured while creating notification' });
+        .json({ message: "An error occured while creating notification" });
     }
   }
-}
+};
