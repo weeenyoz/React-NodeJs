@@ -1,4 +1,5 @@
 import { flatten } from "lodash";
+import asyncMiddleware from "../middleware/async";
 import Teacher, { TeacherInterface } from "../models/Teacher";
 import Student, { StudentInterface } from "../models/Student";
 import SuspendedStudent from "../models/SuspendedStudents";
@@ -49,14 +50,10 @@ interface NotificationInput {
   students: Array<{ email: string }> | string[];
 }
 
-export const getAll = async (req: any, res: any, next: any) => {
-  try {
-    const teachers = await Teacher.query();
-    teachers && res.send(teachers);
-  } catch (error) {
-    next(error);
-  }
-};
+export const getAll = asyncMiddleware(async (req: any, res: any) => {
+  const teachers = await Teacher.query();
+  teachers && res.send(teachers);
+});
 
 export const register = async (req: RegistrationRequestVariables, res: any) => {
   const { teacher, students } = req.body;
